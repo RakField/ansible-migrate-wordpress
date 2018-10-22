@@ -1,0 +1,11 @@
+- hosts: servers
+
+  roles:
+    - osupdate
+    - firewall
+    - ssh
+    - nginx
+    - mysql
+    - php
+    - migratedb
+    - migratewp

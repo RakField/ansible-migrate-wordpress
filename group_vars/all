@@ -1,0 +1,30 @@
+# WordPress database settings
+migrate_db_user: test
+migrate_db_name: test
+migrate_db_password: test
+
+# SQL dump of database which should be migrated
+migrate_db_import_path: /path/to/dbmigrate.sql
+
+# Tar package of wordpress which should be migrated
+migrate_wp_path: /path/to/wordpressmigrate.tar
+
+# Hostname of the site
+migrate_hostname: insertserverhost
+  
+mysql_port: 3306
+mysql_root_password: root
+
+auto_up_disable: true
+
+server_hostname: insertserverhost
+
+# WordPress Version
+wp_version: 4.9.1
+wp_sha1sum: 892d2c23b9d458ec3d44de59b753adb41012e903
+
+#Define Core Update Level
+#true  = Development, minor, and major updates are all enabled
+#false = Development, minor, and major updates are all disabled
+#minor = Minor updates are enabled, development, and major updates are disabled
+core_update_level: true

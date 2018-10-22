@@ -1,0 +1,4 @@
+---
+- name: install ssh
+  service: name=ssh state=restarted
+  become: yes

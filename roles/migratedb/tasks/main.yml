@@ -1,0 +1,30 @@
+---
+
+- name: Create mysql user
+  become: true
+  mysql_user:
+    name: "{{ migrate_db_user }}"
+    password: "{{ migrate_db_password }}"
+    priv: "*.*:ALL"
+
+- name: Create mysql database
+  become: true
+  mysql_db:
+    name: "{{ migrate_db_name }}"
+    state: present
+
+- name: Copy database
+  become: true
+  copy:
+    src: "{{ migrate_db_import_path }}"
+    dest: /tmp/sorsa.sql
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Import database
+  become: true
+  mysql_db:
+      name: "{{ migrate_db_name }}"
+      state: import
+      target: /tmp/sorsa.sql

@@ -1,0 +1,73 @@
+---
+- name: Create webroot
+  file:
+    state: directory
+    path: /srv/www/
+    owner: root
+    group: root
+    mode: 0755
+  become: yes
+
+- name: Create tmp migrate dir
+  file:
+    state: directory
+    path: /tmp/migrate_wp
+    owner: root
+    group: root
+    mode: 0755
+  become: yes
+
+- name: Check if WordPress directory exists in /srv/www
+  stat: path=/srv/www/{{migrate_hostname}}
+  register: check_path
+
+- name: Copy wordpress to remote host
+  become: true
+  copy:
+    src: "{{ migrate_wp_path }}"
+    dest: /tmp/migrate_wp.tar
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Extract WordPress
+  unarchive:
+    src: /tmp/migrate_wp.tar
+    dest: /tmp/migrate_wp
+    owner: www-data
+    group: www-data
+    copy: no
+  become: yes
+  when: not check_path.stat.exists
+
+- name: Move WordPress install files
+  command: mv /tmp/migrate_wp /srv/www/{{migrate_hostname}}
+  become: yes
+  when: not check_path.stat.exists
+
+- name: Fetch random salts for WordPress config
+  local_action: command curl https://api.wordpress.org/secret-key/1.1/salt/
+  register: "wp_salt"
+  become: no
+
+- name: Add wp-config
+  template: "src=wp-config.php dest=/srv/www/{{migrate_hostname}}/wp-config.php"
+  become: yes
+
+- name: Update WordPress config file
+  lineinfile:
+    dest: "/srv/www/{{migrate_hostname}}/wp-config.php"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - {'regexp': "define\\('DB_NAME', '(.)+'\\);", 'line': "define('DB_NAME', '{{migrate_db_name}}');"}
+    - {'regexp': "define\\('DB_USER', '(.)+'\\);", 'line': "define('DB_USER', '{{migrate_db_user}}');"}
+    - {'regexp': "define\\('DB_PASSWORD', '(.)+'\\);", 'line': "define('DB_PASSWORD', '{{migrate_db_password}}');"}
+    - {'regexp': "define\\('WP_HOME', '(.)+'\\);", 'line': "define('WP_HOME', 'http://{{migrate_hostname}}');"}
+    - {'regexp': "define\\('WP_SITEURL', '(.)+'\\);", 'line': "define('WP_SITEURL', 'http://{{migrate_hostname}}');"}
+  become: yes
+
+
+
+
+

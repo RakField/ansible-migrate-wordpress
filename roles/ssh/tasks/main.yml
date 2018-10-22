@@ -1,0 +1,24 @@
+---
+# Task file for sshd
+
+- name: Update apt cache
+  apt: update_cache=yes cache_valid_time=3600
+  become: yes
+
+- name: Install sshd
+  apt: name={{ item }} state=present
+  become: yes
+  with_items:
+    - ssh
+
+- name: Disable ssh password login
+  command: sed -i "s/PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
+  become: yes
+
+- name: Disable ssh root login
+  command: sed -i "s/PermitRootLogin yes/PermitRootLogin no/" /etc/ssh/sshd_config
+  become: yes
+
+- name: Restart ssh
+  action: service name=ssh state=restarted
+  become: yes
